@@ -1,1 +1,1 @@
-KEYWORDS = ['街拍紧身裤']
+KEYWORDS = ['美女']
