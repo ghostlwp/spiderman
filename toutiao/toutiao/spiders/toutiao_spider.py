@@ -44,7 +44,7 @@ class toutiaoSpiderSpider(scrapy.Spider):
     def start_requests(self):
         for keyword in KEYWORDS:
             offset = 0
-            while offset < 50:
+            while offset < 200:
                 timestamp = int(round(time.time() * 1000))
                 data={
                     'keyword': keyword,
@@ -83,6 +83,9 @@ class toutiaoSpiderSpider(scrapy.Spider):
                     else:
                         toutiao_item["pic_id"] = pic_id
                         toutiao_item["pic_link"] = new_image_url
-                        toutiao_item["pic_desc"] = "jj"
+                        toutiao_item["pic_desc"] = self.getPicDesc()
                         yield toutiao_item
 
+    def getPicDesc(self):
+        desc="jjj"
+        return desc

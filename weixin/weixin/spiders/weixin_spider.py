@@ -3,6 +3,8 @@ import time
 import pymongo
 import scrapy
 import hashlib
+import random
+from weixin.mongoop import getCollectionCount,pageQuery
 from urllib.parse import urlencode
 
 from weixin.items import WeixinItem
@@ -65,7 +67,6 @@ class WeixinSpiderSpider(scrapy.Spider):
         # yield scrapy.Request(url, meta={'cookiejar': cookie_jar}, callback=self.parse)
             yield scrapy.Request(url, cookies=cookies, callback=self.parse)
     def parse(self, response):
-
         artic_list=response.xpath("//div[@class='txt-box']")
         # cookie = response.headers.getlist('Set-Cookie')[0].split(';')[0]
         # print(cookie)
@@ -80,6 +81,7 @@ class WeixinSpiderSpider(scrapy.Spider):
         if next_link:
             # yield scrapy.Request("https://weixin.sogou.com/weixin" + next_link, meta={'cookiejar': response.meta['cookiejar']}, callback=self.parse)
             yield scrapy.Request("https://weixin.sogou.com/weixin" + next_link, cookies=cookies, callback=self.parse)
+
     def parse_artic(self, response):
         # print(response.text)
         # print("---------------------")
@@ -92,7 +94,24 @@ class WeixinSpiderSpider(scrapy.Spider):
                 print("continue")
                 continue
             else:
+                desc=self.getPicDesc()
                 weixin_item["pic_id"] = pic_id
                 weixin_item["pic_link"] = item
-                weixin_item["pic_desc"] = "jj"
+                weixin_item["pic_desc"] = desc
                 yield weixin_item
+
+    def getPicDesc(self):
+
+        # 感叹词+主语+宾语+行为+地点+时间+国家
+        desc=self.getWord("interjection")+" "+self.getWord("subject")+" "+self.getWord("object")+" "+self.getWord("action")+" "+self.getWord("location")+" "+self.getWord("time")+" in "+self.getWord("country")
+        print(desc)
+        return desc
+
+    def getWord(self,collectionName):
+        subjectCount = getCollectionCount(collectionName)
+        subjectIndex = random.randint(1, subjectCount)
+        print(subjectIndex)
+        results = pageQuery(collectionName, None, 1, subjectIndex)
+        result = results[0]
+        word = result['ename']
+        return word
